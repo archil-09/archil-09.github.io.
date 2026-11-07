@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Archil – AI/ML Developer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Instrument+Sans:wght@400;500&display=swap">
+<style>
+:root{--bg:#eef0fb;--fg:#17183a;--mut:#575a82;--panel:rgba(255,255,255,.86);--edge:rgba(23,24,58,.14);--acc:#d9480f;--node:#d9480f;--dot:#5b5fc7;--line:#9a9de0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1030;--fg:#eceeff;--mut:#a6a9d6;--panel:rgba(22,23,64,.88);--edge:rgba(236,238,255,.16);--acc:#ffa94d;--node:#ffa94d;--dot:#8f93ff;--line:#4b4fa8}}
+:root[data-theme="dark"]{--bg:#0f1030;--fg:#eceeff;--mut:#a6a9d6;--panel:rgba(22,23,64,.88);--edge:rgba(236,238,255,.16);--acc:#ffa94d;--node:#ffa94d;--dot:#8f93ff;--line:#4b4fa8}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:"Instrument Sans",system-ui,sans-serif;overflow:hidden}
+#c{position:fixed;inset:0}
+#c canvas{display:block;cursor:grab}
+h1,h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;margin:0}
+.hero{position:fixed;left:clamp(16px,4vw,48px);top:calc(env(safe-area-inset-top,0px) + clamp(16px,4vw,40px));max-width:min(30rem,calc(100% - 32px));pointer-events:none}
+.hero h1{font-size:clamp(2.2rem,6vw,4rem);line-height:1;letter-spacing:-.02em}
+.hero p{margin:.8rem 0 0;color:var(--mut);line-height:1.5;max-width:34ch}
+.top{position:fixed;right:clamp(16px,4vw,48px);top:calc(env(safe-area-inset-top,0px) + clamp(16px,4vw,40px))}
+.top a{color:var(--fg);text-decoration:none;border:1px solid var(--edge);background:var(--panel);padding:.5rem .9rem;border-radius:999px;font-weight:500}
+.top a:hover,.top a:focus-visible{border-color:var(--acc);outline:none}
+.label{position:fixed;left:0;top:0;transform:translate(-50%,0);background:var(--panel);border:1px solid var(--edge);color:var(--fg);font:500 .8rem "Instrument Sans",sans-serif;padding:.25rem .6rem;border-radius:999px;white-space:nowrap;cursor:pointer;margin-top:14px}
+.label:hover,.label:focus-visible,.label.on{border-color:var(--acc);outline:none}
+.label.on{background:var(--acc);color:var(--bg)}
+.hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);color:var(--mut);font-size:.85rem;pointer-events:none;transition:opacity .3s}
+.panel{position:fixed;right:clamp(12px,3vw,40px);bottom:calc(env(safe-area-inset-bottom,0px) + 16px);width:min(26rem,calc(100% - 24px));background:var(--panel);border:1px solid var(--edge);border-radius:18px;padding:1.2rem 1.3rem;backdrop-filter:blur(10px);transform:translateY(130%);transition:transform .35s ease}
+.panel.open{transform:none}
+.panel h2{font-size:1.4rem;margin-right:2rem}
+.panel p{color:var(--mut);line-height:1.55;margin:.6rem 0 .9rem}
+.tags{display:flex;flex-wrap:wrap;gap:.4rem}
+.tags span{border:1px solid var(--edge);padding:.2rem .6rem;border-radius:999px;font-size:.8rem}
+.x{position:absolute;right:.8rem;top:.8rem;width:2rem;height:2rem;border-radius:50%;border:1px solid var(--edge);background:transparent;color:var(--fg);font-size:1.1rem;cursor:pointer}
+.x:focus-visible{outline:2px solid var(--acc)}
+.skills{position:fixed;left:clamp(16px,4vw,48px);bottom:calc(env(safe-area-inset-bottom,0px) + 40px);max-width:24rem;color:var(--mut);font-size:.85rem;line-height:1.6;pointer-events:none}
+.msg{position:fixed;inset:0;display:none;place-items:center;text-align:center;padding:2rem;color:var(--mut)}
+@media (max-width:640px){.skills{display:none}.panel{bottom:calc(env(safe-area-inset-bottom,0px) + 8px)}}
+@media (prefers-reduced-motion:reduce){.panel{transition:none}}
+</style>
+</head>
+<body>
+<div id="c"></div>
+<div class="hero">
+  <h1>Archil</h1>
+  <p>I build AI chatbots, agents and vision models, from the Python backend to the interface people use.</p>
+</div>
+<div class="top"><a href="https://github.com/archil-09" target="_blank" rel="noopener">GitHub</a></div>
+<div class="skills">LangChain, LlamaIndex, LangGraph, FastAPI, PyTorch, Chroma, Qdrant. Available for freelance projects on Fiverr.</div>
+<div class="hint" id="hint">Drag to look around. Click a node to open a project.</div>
+<section class="panel" id="panel" aria-live="polite">
+  <button class="x" id="close" aria-label="Close project">&times;</button>
+  <h2 id="pt"></h2><p id="pd"></p><div class="tags" id="pg"></div>
+</section>
+<div class="msg" id="msg">3D isn’t available on this device. Pick a project below.</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+var P=[
+{n:"Hotel multi-agent system",d:"A LangGraph system where specialist agents handle bookings, guest questions and database lookups for a hotel, with a SQL agent that answers staff queries in plain language.",t:["LangGraph","FastAPI","SQLAlchemy"]},
+{n:"Student assistant",d:"A campus assistant for university students. A router sends each question to the right tool, and a document pipeline answers from official PDFs.",t:["LangGraph","Docling","Chroma","Groq"]},
+{n:"Dental clinic chatbot",d:"A chatbot for a dental clinic that answers patient questions from the clinic’s own documents and uses agents to help with appointments.",t:["LangChain","RAG","Agents"]},
+{n:"Hotel WhatsApp booking",d:"Guests book rooms by chatting on WhatsApp. The backend turns their messages into confirmed reservations.",t:["WhatsApp","Python","LLM"]},
+{n:"Face recognition",d:"Real-time face recognition from a webcam, split into separate detection and matching steps so each can be tuned on its own.",t:["InsightFace","OpenCV","Python"]}
+];
+var css=function(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()};
+var panel=document.getElementById('panel'),hint=document.getElementById('hint');
+var sel=-1,labels=[],nodes=[],hits=[];
+function pick(i){sel=i;labels.forEach(function(l,k){l.classList.toggle('on',k===i)});
+ if(i<0){panel.classList.remove('open');return}
+ document.getElementById('pt').textContent=P[i].n;document.getElementById('pd').textContent=P[i].d;
+ document.getElementById('pg').innerHTML=P[i].t.map(function(x){return'<span>'+x+'</span>'}).join('');
+ panel.classList.add('open');hint.style.opacity=0}
+document.getElementById('close').onclick=function(){pick(-1)};
+addEventListener('keydown',function(e){if(e.key==='Escape')pick(-1)});
+
+try{
+var host=document.getElementById('c');
+var scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,100);
+cam.position.set(0,0,10);
+var ren=new THREE.WebGLRenderer({antialias:true,alpha:true});
+ren.setPixelRatio(Math.min(devicePixelRatio,2));ren.setSize(innerWidth,innerHeight);host.appendChild(ren.domElement);
+var g=new THREE.Group();scene.add(g);
+
+var pts=[],i,j,v;
+for(i=0;i<80;i++){v=new THREE.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5).multiplyScalar(14);pts.push(v)}
+var pp=[];
+for(i=0;i<P.length;i++){var a=i/P.length*Math.PI*2;pp.push(new THREE.Vector3(Math.cos(a)*4.2,Math.sin(a*2)*1.6,Math.sin(a)*4.2))}
+var all=pts.concat(pp);
+
+var dotMat=new THREE.PointsMaterial({size:.12,color:css('--dot')});
+g.add(new THREE.Points(new THREE.BufferGeometry().setFromPoints(pts),dotMat));
+var seg=[];
+for(i=0;i<all.length;i++)for(j=i+1;j<all.length;j++)if(all[i].distanceTo(all[j])<3.2)seg.push(all[i],all[j]);
+var lineMat=new THREE.LineBasicMaterial({color:css('--line'),transparent:true,opacity:.55});
+g.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(seg),lineMat));
+
+var nodeMat=new THREE.MeshBasicMaterial({color:css('--node')});
+var hitMat=new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false});
+pp.forEach(function(p,k){
+ var m=new THREE.Mesh(new THREE.SphereGeometry(.26,24,24),nodeMat);m.position.copy(p);g.add(m);nodes.push(m);
+ var h=new THREE.Mesh(new THREE.SphereGeometry(.7,12,12),hitMat);h.position.copy(p);h.userData.i=k;g.add(h);hits.push(h);
+ var l=document.createElement('button');l.className='label';l.textContent=P[k].n;l.onclick=function(){pick(k)};
+ document.body.appendChild(l);labels.push(l)});
+
+function recolor(){dotMat.color.set(css('--dot'));lineMat.color.set(css('--line'));nodeMat.color.set(css('--node'))}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',recolor);
+
+var ray=new THREE.Raycaster(),mouse=new THREE.Vector2(),mx=0,my=0,drag=false,lx=0,ly=0,moved=0,spin=0,tilt=0;
+var still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var el=ren.domElement;
+el.addEventListener('pointerdown',function(e){drag=true;lx=e.clientX;ly=e.clientY;moved=0});
+addEventListener('pointerup',function(e){
+ if(drag&&moved<6&&e.target===el){mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(mouse,cam);
+  var r=ray.intersectObjects(hits);pick(r.length?r[0].object.userData.i:-1)}drag=false});
+addEventListener('pointermove',function(e){
+ mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5;
+ if(drag){var dx=e.clientX-lx,dy=e.clientY-ly;moved+=Math.abs(dx)+Math.abs(dy);g.rotation.y+=dx*.006;tilt=Math.max(-.6,Math.min(.6,tilt+dy*.004));lx=e.clientX;ly=e.clientY}});
+addEventListener('resize',function(){cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();ren.setSize(innerWidth,innerHeight)});
+
+var want=new THREE.Vector3(),look=new THREE.Vector3(),tgt=new THREE.Vector3(),wp=new THREE.Vector3(),sp=new THREE.Vector3();
+function frame(){
+ requestAnimationFrame(frame);
+ if(!still&&sel<0&&!drag)g.rotation.y+=.0018;
+ g.rotation.x+=(tilt-g.rotation.x)*.08;
+ if(sel>=0){nodes[sel].getWorldPosition(wp);want.set(wp.x*.55,wp.y*.55,wp.z*.55+(wp.z>=0?4.2:-4.2));
+  if(wp.z<0)want.copy(wp).multiplyScalar(1.7);tgt.copy(wp)}
+ else{want.set(mx*1.6,-my*1.1,innerWidth<700?14:10);tgt.set(0,0,0)}
+ cam.position.lerp(want,.06);look.lerp(tgt,.08);cam.lookAt(look);
+ nodes.forEach(function(n,k){var s=k===sel?1.5:1;n.scale.lerp(new THREE.Vector3(s,s,s),.15);
+  n.getWorldPosition(sp);sp.project(cam);var l=labels[k];
+  if(sp.z>1){l.style.display='none'}else{l.style.display='';l.style.left=((sp.x+1)/2*innerWidth)+'px';l.style.top=((1-sp.y)/2*innerHeight)+'px'}});
+ ren.render(scene,cam)}
+frame();
+}catch(err){
+ document.getElementById('msg').style.display='grid';
+ P.forEach(function(p,k){var b=document.createElement('button');b.className='label';b.style.position='static';b.style.margin='4px';b.textContent=p.n;b.onclick=function(){pick(k)};document.getElementById('msg').appendChild(b)});
+}
+</script>
+</body>
+</html>
